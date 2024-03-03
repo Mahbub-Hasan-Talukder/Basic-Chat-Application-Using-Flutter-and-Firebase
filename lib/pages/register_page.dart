@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minimal_chat/auth/auth_service.dart';
 import 'package:minimal_chat/components/my_button.dart';
 import 'package:minimal_chat/components/my_text_fields.dart';
 
@@ -11,8 +12,32 @@ class RegisterPage extends StatelessWidget {
 
   RegisterPage({super.key, required this.onTap});
 
-  void register() {}
-  
+  //register method
+  void register(BuildContext context) {
+    //get auth service
+    final auth = AuthService();
+
+    //password match -> create user
+    if (_pwController.text == _confirmPwController.text) {
+      try {
+        auth.signUpWithEmailPassword(_emailController.text, _pwController.text);
+      } catch (e) {
+        showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+                  title: Text(e.toString()),
+                ));
+      }
+    }
+    //password don't match
+    else{
+      showDialog(
+            context: context,
+            builder: (context) => const AlertDialog(
+                  title: Text("Passwords don't match!"),
+                ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +77,7 @@ class RegisterPage extends StatelessWidget {
               obsecureFlag: true,
             ),
 
-             //confirm password text field
+            //confirm password text field
             MyTextField(
               controller: _confirmPwController,
               hintText: 'Confirm Password',
@@ -65,12 +90,11 @@ class RegisterPage extends StatelessWidget {
             //submit button
             MyButton(
               buttonType: 'Register',
-              onTap: register,
+              onTap: () => register(context),
             ),
             const SizedBox(
               height: 10,
             ),
-
 
             //Already have an account?
             Row(
@@ -83,7 +107,8 @@ class RegisterPage extends StatelessWidget {
                   child: Text(
                     ' Login now!',
                     style: TextStyle(
-                        fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade700),
                   ),
                 ),
               ],
