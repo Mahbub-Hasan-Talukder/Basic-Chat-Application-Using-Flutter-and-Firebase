@@ -9,7 +9,8 @@ class ChatPage extends StatefulWidget {
   final String receiveEmail;
   final String receiverId;
 
-  ChatPage({super.key, required this.receiveEmail, required this.receiverId});
+  const ChatPage(
+      {super.key, required this.receiveEmail, required this.receiverId});
 
   @override
   State<ChatPage> createState() => _ChatPageState();
@@ -25,18 +26,58 @@ class _ChatPageState extends State<ChatPage> {
   final ChatService _chatService = ChatService();
 
   //for text field focus
+  FocusNode myFocusNode = FocusNode();
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    //add listener to focus node
+    myFocusNode.addListener(() {
+      if (myFocusNode.hasFocus) {
+        //make a delay so that keyboard has time to focus
+        //then then the amount of spaces will be calculated
+        //then scroll down
+        Future.delayed(
+          const Duration(milliseconds: 500),
+          () => scrollDown(),
+        );
+      }
+    });
+    //wait for list view to be built
+    Future.delayed(const Duration(microseconds: 500), () => scrollDown());
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    myFocusNode.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  //scroll controller
+  final ScrollController _myScrollerController = ScrollController();
+  void scrollDown() {
+    _myScrollerController.animateTo(
+        _myScrollerController.position.maxScrollExtent,
+        duration: const Duration(seconds: 1),
+        curve: Curves.fastOutSlowIn);
+  }
 
   //send message
   void sendMessage() async {
     //if there is somethin inside the text field
     if (_messageController.text.isNotEmpty) {
       //send message
-      await ChatService().sendMessage(widget.receiverId, _messageController.text);
+      await ChatService()
+          .sendMessage(widget.receiverId, _messageController.text);
 
       //clear the controller
       _messageController.clear();
     }
+    scrollDown();
   }
 
   @override
@@ -77,6 +118,7 @@ class _ChatPageState extends State<ChatPage> {
 
           //return list view
           return ListView(
+            controller: _myScrollerController,
             children: snapshot.data!.docs
                 .map((doc) => _buildMessageItem(doc))
                 .toList(),
@@ -111,6 +153,7 @@ class _ChatPageState extends State<ChatPage> {
               child: MyTextField(
                   hintText: 'Type here',
                   obsecureFlag: false,
+                  focusNode: myFocusNode,
                   controller: _messageController)),
           //send button
           IconButton(
@@ -119,7 +162,6 @@ class _ChatPageState extends State<ChatPage> {
                 Icons.send,
                 size: 40,
                 color: Colors.green,
-                
               ))
         ],
       ),
