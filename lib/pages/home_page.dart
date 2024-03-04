@@ -6,7 +6,7 @@ import 'package:minimal_chat/services/auth/auth_service.dart';
 import 'package:minimal_chat/services/chat/chat_service.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  HomePage({super.key});
   // void logout(){
   //   final auth = AuthService();
   //   auth.signOut();
@@ -55,7 +55,8 @@ class HomePage extends StatelessWidget {
   Widget _buildUserListItem(
       Map<String, dynamic> userData, BuildContext context) {
     //display all user except current user
-    return UserTile(
+    if(userData['email']!=_authService.getCurrentUser()!.email){
+      return UserTile(
       text: userData['email'],
       onTap: () {
         //tap on a user -> goto chatpage
@@ -64,9 +65,14 @@ class HomePage extends StatelessWidget {
             MaterialPageRoute(
               builder: (context) => ChatPage(
                 receiveEmail: userData['email'],
+                receiverId: userData['uid'],
               ),
             ));
       },
     );
+    }
+    else{
+      return Container();
+    }
   }
 }

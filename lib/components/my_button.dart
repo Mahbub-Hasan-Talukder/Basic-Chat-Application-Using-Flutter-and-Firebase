@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class MyButton extends StatelessWidget {
   final String buttonType;
   final Function()? onTap;
-  MyButton({super.key, required this.buttonType, required this.onTap});
+  const MyButton({super.key, required this.buttonType, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
